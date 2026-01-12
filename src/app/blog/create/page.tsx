@@ -1,5 +1,5 @@
 import Image from "next/image"
-import supabase from "@/app/_lib/_supabase_client"
+import supabase from "@/app/_lib/_supabase_server_client"
 
 export default function Home() {
     return <>

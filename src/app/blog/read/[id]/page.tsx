@@ -1,18 +1,17 @@
-import supabase from "@/app/_lib/_supabase_client";
-import Image from "next/image"
+import { createSupabaseServerClient } from "@/app/_lib/_supabase_server_client";
 
-type Blog = {
-    id: number;
-    created_at: string;
-    title: string;
-    body: string;
-    upvotes: number;
-    downvotes: number;
-};
+// type Blog = {
+//     id: number;
+//     created_at: string;
+//     title: string;
+//     body: string;
+//     upvotes: number;
+//     downvotes: number;
+// };
 
 export default async function ReadBlog({ params }: { params: Promise<{ id: string }> }) {
+    const supabase = await createSupabaseServerClient();
     const { id } = await params;
-
     const response = await supabase.from('blogs')
         .select('created_at, title, body, upvotes, downvotes')
         .eq('id', id).single();
