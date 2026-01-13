@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
-export default function Home() {
+export default function LandingPage() {
     return <>
         <h1>Hello, Next.js THIS IS THE LANDING PAGE!</h1>
         <Link href={'/login'}>Login</Link>

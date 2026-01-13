@@ -1,12 +1,10 @@
-import createSupabaseServerClient from "@/app/_lib/_supabase_server_client"
+import createSupabaseServerClient from "@/app/_lib/_supabase_server_client";
 
 export default async function User() {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
-    console.log('user =', { user })
-    
+
     return <>
-        <h1>Welcome home</h1>
+        <h1>Welcome home {user?.email}</h1>
     </>
 }
