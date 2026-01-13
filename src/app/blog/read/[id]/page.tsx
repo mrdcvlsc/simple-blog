@@ -19,10 +19,6 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
     const data = response.data;
     const error = response.error;
 
-    // console.log('response =', response);
-    // console.log('data  = ', data);
-    // console.log('error = ', error);
-
     if (error) {
         return <>
             <p>Opps! we didn't find that blog, it might have been deleted or is not existing yet</p>

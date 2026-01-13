@@ -3,7 +3,7 @@
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useEffect, useState } from 'react';
 
-export default function UpdateBlog({ params }: { params: Promise<{ id: string }> }) {
+export default function DeleteBlog({ params }: { params: Promise<{ id: string }> }) {
     const supabase = getSupabaseBrowserClient();
 
     const [title, setTitle] = useState('');
@@ -30,7 +30,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
         fetchBlog();
     }, []);
 
-    async function handleUpdateBlog(e: React.FormEvent<HTMLFormElement>) {
+    async function handleDeleteBlog(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         e.preventDefault();
 
         if (!title && !body) {
@@ -38,34 +38,14 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             return;
         }
 
-        const { error } = await supabase.from('blogs').update({
-            title: title,
-            body: body,
-        }).eq('id', blogID).select();
+        const { error } = await supabase.from('blogs')
+            .delete().eq('id', blogID).select();
     }
 
     return <>
-        <h1>This is the blog UPDATE page</h1>
-        <form onSubmit={handleUpdateBlog}>
-            <input
-                type='text'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder='Blog Title'
-                required
-            />
-
-            <input
-                type='text'
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder='Content Body'
-                required
-            />
-
-            <p>{status}</p>
-
-            <button type='submit'>Update Blog</button>
-        </form>
+        <h1>This is the blog DELETE page</h1>
+        <h2>{title}</h2>
+        <p>{body}</p>
+        <button type='button' onClick={(e) => handleDeleteBlog(e)}>Delete Blog</button>
     </>
 }

@@ -2,14 +2,14 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 import { getEnv } from "@/app/_lib/_getenv";
+import { Database } from '@/app/_lib/database.types';
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type SupabaseSchema = Record<string, never>;
 
-let client: SupabaseClient<SupabaseSchema> | null = null;
+let client: SupabaseClient<Database> | null = null;
 
-export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
+export function getSupabaseBrowserClient(): SupabaseClient<Database> {
 
   if (client) {
     return client;
@@ -26,7 +26,7 @@ export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
     throw new Error(`Missing NEXT_PUBLIC_SUPABASE_API_KEY : ${supabaseApiKey}`);
   }
 
-  client = createBrowserClient<SupabaseSchema>(supabaseURL, supabaseApiKey);
+  client = createBrowserClient<Database>(supabaseURL, supabaseApiKey);
   return client;
 }
 
