@@ -10,6 +10,7 @@ export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [status, setStatus] = useState('');
 
     useEffect(() => {
         async function getAuthenticatedUser() {
@@ -25,6 +26,19 @@ export default function Login() {
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+
+
+        let { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) {
+            setStatus(error.message);
+            return;
+        }
+
+        router.push('/user/home');
     }
 
     return <>
@@ -48,6 +62,7 @@ export default function Login() {
                     required
                 />
             </div>
+            <p>{status}</p>
             <button type='submit'>Login</button>
         </form>
     </>

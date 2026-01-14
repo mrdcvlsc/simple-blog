@@ -47,6 +47,7 @@ export default function Register() {
         }
 
         setStatus('account created');
+        router.push('/user/home');
     }
 
     return <>
