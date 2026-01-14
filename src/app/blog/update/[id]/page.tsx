@@ -60,28 +60,63 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
         router.push(`/blog/read/${blogID}`);
     }
 
-    return <>
-        <h1>This is the blog UPDATE page</h1>
-        <form onSubmit={handleUpdateBlog}>
-            <input
-                type='text'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder='Blog Title'
-                required
-            />
+    return (
+        <div className="max-w-3xl mx-auto space-y-8">
+            <div className="text-center space-y-2 mb-8">
+                <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-linear-to-r from-sky-600 to-cyan-600 bg-clip-text">
+                    Edit Your Blog
+                </h1>
+                <p className="text-gray-600">Update your thoughts and ideas</p>
+            </div>
 
-            <input
-                type='text'
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder='Content Body'
-                required
-            />
+            <form onSubmit={handleUpdateBlog} className="glass-card space-y-6">
+                <div>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Blog Title</label>
+                    <input
+                        type='text'
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder='Enter your blog title...'
+                        className='glass-input text-lg'
+                        required
+                    />
+                </div>
 
-            <p>{status}</p>
+                <div>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Content</label>
+                    <textarea
+                        value={body}
+                        onChange={(e) => setBody(e.target.value)}
+                        placeholder='Update your content...'
+                        className='glass-input min-h-80 resize-none text-base'
+                        required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{body.length} characters</p>
+                </div>
 
-            <button type='submit'>Update Blog</button>
-        </form>
-    </>
+                {status && (
+                    <div className={`p-4 rounded-lg border text-sm ${
+                        status.includes('not allowed')
+                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                        {status}
+                    </div>
+                )}
+
+                <div className="flex gap-4 pt-4">
+                    <button type='submit' className='glass-button-primary flex-1 text-lg font-semibold'>
+                        Save Changes
+                    </button>
+                    <button
+                        type='button'
+                        onClick={() => router.back()}
+                        className='glass-button-secondary flex-1 text-lg font-semibold'
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    )
 }

@@ -55,11 +55,62 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
         router.push('/user/home');
     }
 
-    return <>
-        <h1>This is the blog DELETE page</h1>
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <p>{status}</p>
-        <button type='button' onClick={handleDeleteBlog}>Delete Blog</button>
-    </>
+    return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-280px)] px-4">
+            <div className="w-full max-w-md space-y-6">
+                <div className="flex justify-center">
+                    <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center">
+                        <span className="text-4xl">!</span>
+                    </div>
+                </div>
+
+                <div className="text-center space-y-2">
+                    <h1 className="text-3xl font-bold text-red-600">Delete Blog?</h1>
+                    <p className="text-gray-600">This action cannot be undone.</p>
+                </div>
+
+                <div className="glass-card space-y-3">
+                    <div>
+                        <p className="text-xs text-gray-500 uppercase font-semibold">Title</p>
+                        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+                    </div>
+                    <div className="border-t border-white/20 pt-3">
+                        <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Preview</p>
+                        <p className="text-gray-700 line-clamp-3">{body}</p>
+                    </div>
+                </div>
+
+                {status && (
+                    <div className={`p-4 rounded-lg border text-sm ${
+                        status.includes('not allowed')
+                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                        {status}
+                    </div>
+                )}
+
+                <div className="flex gap-4">
+                    <button
+                        type='button'
+                        onClick={handleDeleteBlog}
+                        className='glass-button-primary flex-1 text-lg font-semibold bg-red-500 hover:bg-red-600'
+                    >
+                        Delete
+                    </button>
+                    <button
+                        type='button'
+                        onClick={() => router.back()}
+                        className='glass-button-secondary flex-1 text-lg font-semibold'
+                    >
+                        Cancel
+                    </button>
+                </div>
+
+                <p className="text-xs text-gray-500 text-center">
+                    Once deleted, this blog cannot be recovered.
+                </p>
+            </div>
+        </div>
+    )
 }

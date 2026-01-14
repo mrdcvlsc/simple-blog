@@ -1,12 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --background: linear-gradient(135deg, #f0f9ff 0%, #e0f7ff 50%, #cff0ff 100%);
+  --foreground: #0c3d66;
+  --accent: #0ea5e9;
+  --accent-dark: #0284c7;
+}
+
+* {
+  @apply transition-colors duration-200;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7ff 50%, #cff0ff 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+@layer components {
+  /* Glassy glassmorphism effect */
+  .glass-effect {
+    @apply backdrop-blur-xl bg-white/70 border border-white/20 rounded-2xl shadow-lg;
+  }
+
+  .glass-effect-dark {
+    @apply backdrop-blur-xl bg-white/50 border border-white/10 rounded-2xl;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/70 border border-white/20 rounded-2xl shadow-lg p-6 hover:bg-white/80 hover:shadow-xl;
+  }
+
+  .glass-input {
+    @apply w-full px-4 py-3 rounded-xl border border-white/20 bg-white/50 backdrop-blur-sm placeholder-gray-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-200;
+  }
+
+  .glass-button {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 justify-center;
+  }
+
+  .glass-button-primary {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 justify-center bg-gradient-to-r from-sky-400 to-cyan-500 text-white hover:from-sky-500 hover:to-cyan-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+  }
+
+  .glass-button-secondary {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 justify-center bg-white/70 text-sky-600 border border-white/20 hover:bg-white/90 hover:border-white/40;
+  }
+
+  .glass-button-ghost {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 justify-center text-sky-600 hover:bg-white/40;
+  }
+}
+
+/* Subtle gradient animations */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Scrollbar styling for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(240, 249, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.7);
 }
