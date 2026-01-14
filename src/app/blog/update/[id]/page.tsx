@@ -10,6 +10,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
     const [blogID, setBlogID] = useState('');
+    const [ownerID, setOwnerID] = useState('');
 
     useEffect(() => {
         async function fetchBlog() {
@@ -22,9 +23,15 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             const data = response.data;
             const error = response.error;
 
+            if (error) {
+                setStatus("Opps! we didn't find that blog, it might have been deleted or is not existing yet");
+                return;
+            }
+
             setBlogID(id);
             setTitle(data?.title);
             setBody(data?.body);
+            setOwnerID(data?.owner_id);
         }
 
         fetchBlog();
@@ -33,8 +40,8 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
     async function handleUpdateBlog(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (!title && !body) {
-            setStatus('don\'t leave the title and the body of the blog empty');
+        if (ownerID != (await supabase.auth.getUser()).data.user?.id) {
+            setStatus("you're not allowed to update this blog since you're not the owner or have the admin/mod privilege to do so");
             return;
         }
 
@@ -42,6 +49,10 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             title: title,
             body: body,
         }).eq('id', blogID).select();
+
+        if (error) {
+            setStatus(error.message);
+        }
     }
 
     return <>
