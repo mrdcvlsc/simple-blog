@@ -27,6 +27,12 @@ export default function CreateBlog() {
             title: title,
             body: body,
         });
+
+        if (error?.code === '23505') {
+            setStatus('that title is already taken by a another blog post, please think of a different blog post title');
+        } else if (error) {
+            setStatus(error.message);
+        }
     }
 
     return <>
