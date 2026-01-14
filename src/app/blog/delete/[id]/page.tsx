@@ -2,8 +2,10 @@
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function DeleteBlog({ params }: { params: Promise<{ id: string }> }) {
+    const router = useRouter();
     const supabase = getSupabaseBrowserClient();
 
     const [title, setTitle] = useState('');
@@ -47,7 +49,10 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
 
         if (error) {
             setStatus(error.message);
+            return;
         }
+
+        router.push('/user/home');
     }
 
     return <>

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/app/_lib/_supabase_server_client";
+import Link from "next/link";
 
 export default async function ReadBlog({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createSupabaseServerClient();
@@ -28,6 +29,8 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                 <span>{data.upvotes}</span>
                 <span>{data.downvotes}</span>
             </p>
+            <Link href={`/blog/update/${id}`}>Update</Link>
+            <Link href={`/blog/delete/${id}`}>Delete</Link>
         </>
     } else {
         return <>
