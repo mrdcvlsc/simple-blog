@@ -6,13 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-type BlogListItem = {
-    id: number;
-    title: string;
-    created_at: string;
-}
-
-type BlogList = BlogListItem[];
+import type { BlogList } from '@/app/_lib/mytypes';
 
 export default function UserHomePage() {
     const router = useRouter();
