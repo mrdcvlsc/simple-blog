@@ -2,8 +2,10 @@
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function UpdateBlog({ params }: { params: Promise<{ id: string }> }) {
+    const router = useRouter();
     const supabase = getSupabaseBrowserClient();
 
     const [title, setTitle] = useState('');
@@ -17,7 +19,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             const { id } = await params;
 
             const response = await supabase.from('blogs')
-                .select('id, created_at, title, body, upvotes, downvotes')
+                .select('id, owner_id, created_at, title, body, upvotes, downvotes')
                 .eq('id', id).single();
 
             const data = response.data;
@@ -52,7 +54,10 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
 
         if (error) {
             setStatus(error.message);
+            return;
         }
+
+        router.push(`/blog/read/${blogID}`);
     }
 
     return <>
