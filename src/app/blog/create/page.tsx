@@ -2,13 +2,10 @@
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useState } from 'react';
-
-type Blog = {
-    title: string;
-    body: string;
-};
+import { useRouter } from 'next/navigation';
 
 export default function CreateBlog() {
+    const router = useRouter();
     const supabase = getSupabaseBrowserClient();
 
     const [title, setTitle] = useState('');
@@ -23,15 +20,19 @@ export default function CreateBlog() {
             return;
         }
 
-        const { error } = await supabase.from('blogs').insert({
+        const { error, data } = await supabase.from('blogs').insert({
             title: title,
             body: body,
-        });
+        }).select();
+
+        console.log('insert data =', data);
 
         if (error?.code === '23505') {
             setStatus('that title is already taken by a another blog post, please think of a different blog post title');
         } else if (error) {
             setStatus(error.message);
+        } else {
+            router.push(`/blog/read/${data[0].id}`);
         }
     }
 
