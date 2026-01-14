@@ -1,7 +1,7 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CreateBlog() {
@@ -11,6 +11,19 @@ export default function CreateBlog() {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        async function checkIfUserIsLoggedInFirst() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (!user) {
+                router.push('/auth/login');
+                return;
+            }
+        }
+
+        checkIfUserIsLoggedInFirst();
+    }, []);
 
     async function handlePostBlog(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
