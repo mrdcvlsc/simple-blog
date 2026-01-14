@@ -1,18 +1,30 @@
 'use client';
 
-import supabase from '@/app/_lib/_supabase_server_client';
-import React, { useState } from 'react';
+import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function Register() {
+export default function Login() {
+    const router = useRouter();
+    const supabase = getSupabaseBrowserClient();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [retypePassword, setRetypedPassword] = useState('');
+
+    useEffect(() => {
+        async function getAuthenticatedUser() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (!error && user) {
+                router.push('/user/home');
+            }
+        }
+
+        getAuthenticatedUser();
+    }, []);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-
-
     }
 
     return <>
@@ -36,16 +48,7 @@ export default function Register() {
                     required
                 />
             </div>
-
-            <div>
-                <input
-                    type='password'
-                    value={retypePassword}
-                    onChange={(e) => setRetypedPassword(e.target.value)}
-                    placeholder='Re-typed Password'
-                    required
-                />
-            </div>
+            <button type='submit'>Login</button>
         </form>
     </>
 }

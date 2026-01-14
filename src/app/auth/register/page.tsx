@@ -1,16 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
-
+    const router = useRouter();
     const supabase = getSupabaseBrowserClient();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [retypePassword, setRetypedPassword] = useState('');
     const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        async function getAuthenticatedUser() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+
+            if (!error && user) {
+                router.push('/user/home');
+            }
+        }
+
+        getAuthenticatedUser();
+    }, []);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
