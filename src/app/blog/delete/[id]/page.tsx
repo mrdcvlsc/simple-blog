@@ -25,7 +25,7 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
         async function fetchBlog() {
             const { id } = await params;
 
-            if (!Number.isInteger(id)) {
+            if (isNaN(parseInt(id))) {
                 setStatus('invalid blog id detected, non-numeric characters detected');
                 return;
             }
