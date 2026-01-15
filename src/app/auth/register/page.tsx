@@ -2,11 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
+import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
+import { useAppSelector } from '@/redux/store';
+import { logIn } from '@/redux/authslice';
+
+import type { AppDispatch } from '@/redux/store';
 
 export default function Register() {
     const router = useRouter();
     const supabase = getSupabaseBrowserClient();
+    const dispatch = useDispatch<AppDispatch>();
+    const isAuth = useAppSelector((state) => state.authReducer.value.isAuth);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -14,15 +21,19 @@ export default function Register() {
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        async function getAuthenticatedUser() {
-            const { data: { user }, error } = await supabase.auth.getUser();
+        // async function getAuthenticatedUser() {
+        //     const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (!error && user) {
-                router.push('/user/home');
-            }
+        //     if (!error && user) {
+        //         router.push('/user/home');
+        //     }
+        // }
+
+        // getAuthenticatedUser();
+
+        if (isAuth) {
+            router.push('/user/home');
         }
-
-        getAuthenticatedUser();
     }, []);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -33,12 +44,9 @@ export default function Register() {
             return;
         }
 
-        const { error, data } = await supabase.auth.signUp({
+        const { error, data: { user } } = await supabase.auth.signUp({
             email,
-            password,
-            options: {
-                emailRedirectTo: `${window.location.origin}/user/home`
-            }
+            password
         });
 
         if (error) {
@@ -46,8 +54,13 @@ export default function Register() {
             return;
         }
 
-        setStatus('account created');
-        router.push('/user/home');
+        if (user) {
+            setStatus('account created');
+
+            dispatch(logIn(user));
+            router.push('/user/home');
+        }
+
     }
 
     return (
@@ -98,11 +111,10 @@ export default function Register() {
                     </div>
 
                     {status && (
-                        <div className={`p-3 rounded-lg border text-sm ${
-                            status.includes('created')
-                                ? 'bg-green-50 border-green-200 text-green-700'
-                                : 'bg-red-50 border-red-200 text-red-700'
-                        }`}>
+                        <div className={`p-3 rounded-lg border text-sm ${status.includes('created')
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                            }`}>
                             {status}
                         </div>
                     )}

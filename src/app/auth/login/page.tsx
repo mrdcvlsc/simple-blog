@@ -4,31 +4,43 @@ import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { logIn } from '@/redux/authslice';
+import { useAppSelector } from '@/redux/store';
+import { useDispatch } from 'react-redux';
+
+import type { AppDispatch } from '@/redux/store';
+
 export default function Login() {
     const router = useRouter();
     const supabase = getSupabaseBrowserClient();
+    const dispatch = useDispatch<AppDispatch>();
+    const isAuth = useAppSelector((state) => state.authReducer.value.isAuth);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        async function getAuthenticatedUser() {
-            const { data: { user }, error } = await supabase.auth.getUser();
+        // async function getAuthenticatedUser() {
+        //     const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (!error && user) {
-                router.push('/user/home');
-            }
+        //     if (!error && user) {
+        //         dispatch(logIn(user));
+        //         router.push('/user/home');
+        //     }
+        // }
+
+        // getAuthenticatedUser();
+
+        if (isAuth) {
+            router.push('/user/home');
         }
-
-        getAuthenticatedUser();
     }, []);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-
-        let { data, error } = await supabase.auth.signInWithPassword({
+        let { data: { user }, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         })
@@ -38,7 +50,10 @@ export default function Login() {
             return;
         }
 
-        router.push('/user/home');
+        if (user) {
+            dispatch(logIn(user));
+            router.push('/user/home');
+        }
     }
 
     return (

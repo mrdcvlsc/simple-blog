@@ -4,23 +4,40 @@ import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { useAppSelector } from '@/redux/store';
+
 export default function DeleteBlog({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const supabase = getSupabaseBrowserClient();
+    const isAuth = useAppSelector((state) => state.authReducer.value.isAuth);
+    const authUser = useAppSelector((state) => state.authReducer.value.user);
 
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
-    const [blogID, setBlogID] = useState('');
     const [ownerID, setOwnerID] = useState('');
 
     useEffect(() => {
+        if (!isAuth) {
+            router.push('/auth/login');
+        }
+
         async function fetchBlog() {
             const { id } = await params;
 
+            if (!Number.isInteger(id)) {
+                setStatus('invalid blog id detected, non-numeric characters detected');
+                return;
+            }
+
+            if (Number(id) < 0) {
+                setStatus('invalid blog id detected, negative blog id numbers does not exist');
+                return;
+            }
+
             const response = await supabase.from('blogs')
-                .select('id, created_at, title, body, upvotes, downvotes, owner_id')
-                .eq('id', id).single();
+                .select()
+                .eq('id', parseInt(id)).single();
 
             const data = response.data;
             const error = response.error;
@@ -30,22 +47,25 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
                 return;
             }
 
-            setBlogID(id);
-            setTitle(data?.title);
-            setBody(data?.body);
-            setOwnerID(data?.owner_id);
+            if (data) {
+                setTitle(data?.title);
+                setBody(data?.body);
+                setOwnerID(data?.owner_id);
+            } else {
+                setStatus('an error occur when fetching the blog data, please try again');
+            }
         }
 
         fetchBlog();
     }, []);
 
     async function handleDeleteBlog() {
-        if (ownerID != (await supabase.auth.getUser()).data.user?.id) {
+        if (ownerID != authUser?.id) {
             setStatus("you're not allowed to delete this blog since you're not the owner or have the admin/mod privilege to do so");
             return;
         }
 
-        const { error } = await supabase.from('blogs').delete().eq('id', blogID);
+        const { error } = await supabase.from('blogs').delete().eq('id', parseInt((await params).id));
 
         if (error) {
             setStatus(error.message);
@@ -81,11 +101,10 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
                 </div>
 
                 {status && (
-                    <div className={`p-4 rounded-lg border text-sm ${
-                        status.includes('not allowed')
-                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-                            : 'bg-red-50 border-red-200 text-red-700'
-                    }`}>
+                    <div className={`p-4 rounded-lg border text-sm ${status.includes('not allowed')
+                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                        : 'bg-red-50 border-red-200 text-red-700'
+                        }`}>
                         {status}
                     </div>
                 )}
@@ -95,6 +114,7 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
                         type='button'
                         onClick={handleDeleteBlog}
                         className='glass-button-primary flex-1 text-lg font-semibold bg-red-500 hover:bg-red-600'
+                        disabled={!isAuth}
                     >
                         Delete
                     </button>

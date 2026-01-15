@@ -6,35 +6,79 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import { useAppSelector } from '@/redux/store';
+import { useDispatch } from 'react-redux';
+
+import type { AppDispatch } from '@/redux/store';
+
 import type { BlogList } from '@/app/_lib/mytypes';
+import { logOut } from '@/redux/authslice';
 
 export default function UserHomePage() {
     const router = useRouter();
     const supabase = getSupabaseBrowserClient();
+    const isAuth = useAppSelector((state) => state.authReducer.value.isAuth);
+    const authUser = useAppSelector((state) => state.authReducer.value.user);
+    const dispatch = useDispatch<AppDispatch>();
 
-    const [user, setUser] = useState<User | null>(null);
     const [status, setStatus] = useState('');
     const [userBlogs, setUserBlogs] = useState<BlogList>([]);
 
     useEffect(() => {
-        async function authenticateUser() {
-            const { data: { user }, error } = await supabase.auth.getUser();
+        // async function authenticateUser() {
+        //     const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (error) {
-                console.log(error.message);
-                router.push('/');
+        //     if (error) {
+        //         console.log(error.message);
+        //         router.push('/');
+        //         return;
+        //     } else {
+        //         setUser(user);
+        //     }
+
+        //     const response = await supabase
+        //         .from('blogs')
+        //         .select("id, title, created_at")
+        //         .eq('owner_id', user?.id);
+
+        //     if (response.error) {
+        //         setStatus(`on page load: ${response.error.message}`);
+        //         return;
+        //     }
+
+        //     console.log('blogs:');
+        //     console.log(response.data);
+        //     setUserBlogs(response.data);
+        // };
+
+        // authenticateUser();
+
+
+        /////////////////
+
+        if (!isAuth) {
+            router.push('/');
+            return;
+        }
+
+        async function loadBlogs() {
+            if (!authUser) {
+                setStatus(
+                    "there was a problem in the app, we detected that a user is logged" +
+                    "-in but the user data is not preset, please clear the browser" +
+                    "history, cache and cookies of this website and login again with" +
+                    "your account to possibly fix the issue."
+                );
                 return;
-            } else {
-                setUser(user);
             }
 
             const response = await supabase
                 .from('blogs')
                 .select("id, title, created_at")
-                .eq('owner_id', user?.id);
+                .eq('owner_id', authUser.id);
 
             if (response.error) {
-                setStatus(`on page load: ${response.error.message}`);
+                setStatus(`we're unable to load the user blog post, ${response.error.message}`);
                 return;
             }
 
@@ -43,7 +87,7 @@ export default function UserHomePage() {
             setUserBlogs(response.data);
         };
 
-        authenticateUser();
+        loadBlogs();
     }, []);
 
     const handleLogout = async function logoutUser() {
@@ -54,6 +98,7 @@ export default function UserHomePage() {
             return;
         }
 
+        dispatch(logOut());
         router.push('/');
     }
 
@@ -62,9 +107,9 @@ export default function UserHomePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-2">
                     <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-linear-to-r from-sky-600 to-cyan-600 bg-clip-text">
-                        Welcome, {user?.email?.split('@')[0] || 'Writer'}
+                        Welcome, {authUser?.email?.split('@')[0] || 'Writer'}
                     </h1>
-                    <p className="text-gray-600">{user?.email}</p>
+                    <p className="text-gray-600">{authUser?.email}</p>
                 </div>
                 <button
                     onClick={handleLogout}

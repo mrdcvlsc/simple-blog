@@ -4,25 +4,33 @@ import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { useAppSelector } from '@/redux/store';
+
 export default function CreateBlog() {
     const router = useRouter();
     const supabase = getSupabaseBrowserClient();
+
+    const isAuth = useAppSelector((state) => state.authReducer.value.isAuth);
 
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        async function checkIfUserIsLoggedInFirst() {
-            const { data: { user }, error } = await supabase.auth.getUser();
+        // async function checkIfUserIsLoggedInFirst() {
+        //     const { data: { user }, error } = await supabase.auth.getUser();
 
-            if (!user) {
-                router.push('/auth/login');
-                return;
-            }
+        //     if (!user) {
+        //         router.push('/auth/login');
+        //         return;
+        //     }
+        // }
+
+        // checkIfUserIsLoggedInFirst();
+
+        if (!isAuth) {
+            router.push('/auth/login');
         }
-
-        checkIfUserIsLoggedInFirst();
     }, []);
 
     async function handlePostBlog(e: React.FormEvent<HTMLFormElement>) {
@@ -85,11 +93,10 @@ export default function CreateBlog() {
                 </div>
 
                 {status && (
-                    <div className={`p-4 rounded-lg border text-sm ${
-                        status.includes('already')
+                    <div className={`p-4 rounded-lg border text-sm ${status.includes('already')
                             ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
                             : 'bg-red-50 border-red-200 text-red-700'
-                    }`}>
+                        }`}>
                         {status}
                     </div>
                 )}
