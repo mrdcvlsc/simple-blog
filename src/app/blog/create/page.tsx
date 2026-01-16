@@ -1,7 +1,7 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useAppSelector } from '@/redux/store';
@@ -15,6 +15,9 @@ export default function CreateBlog() {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
+
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         // async function checkIfUserIsLoggedInFirst() {
@@ -41,9 +44,29 @@ export default function CreateBlog() {
             return;
         }
 
+        if (selectedImage) {
+            const { data, error } = await supabase
+                .storage
+                .from('uploaded_images')
+                .upload(`private/${selectedImage.name}`, selectedImage, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            console.log('    data.path :', data?.path);
+            console.log('data.id :', data?.id);
+            console.log('data.fullPath :', data?.fullPath);
+
+            if (error) {
+                console.log('error uploading image :', error.message);
+                setStatus(error.message);
+            }
+        }
+
         const { error, data } = await supabase.from('blogs').insert({
             title: title,
             body: body,
+            image: selectedImage ? `private/${selectedImage.name}` : null,
         }).select();
 
         console.log('insert data =', data);
@@ -81,6 +104,41 @@ export default function CreateBlog() {
                 </div>
 
                 <div>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Upload Image</label>
+                    {selectedImage && (
+                        <div>
+                            {/* Display the selected image */}
+                            <img
+                                alt="not found"
+                                width={"250px"}
+                                src={URL.createObjectURL(selectedImage)}
+                            />
+                            <br /> <br />
+                            {/* Button to remove the selected image */}
+                            <button onClick={() => {
+                                if (fileInputRef.current) {
+                                    fileInputRef.current.value = '';
+                                }
+                                setSelectedImage(null)
+                            }}>Remove</button>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        name="myImage"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={(event) => {
+                            if (event.target.files) {
+                                console.log(event.target.files[0]);
+                                setSelectedImage(event.target.files[0]);
+                            }
+                        }}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Upload beautiful image</p>
+                </div>
+
+                <div>
                     <label className="block text-lg font-semibold text-gray-800 mb-2">Content</label>
                     <textarea
                         value={body}
@@ -94,8 +152,8 @@ export default function CreateBlog() {
 
                 {status && (
                     <div className={`p-4 rounded-lg border text-sm ${status.includes('already')
-                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-                            : 'bg-red-50 border-red-200 text-red-700'
+                        ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                        : 'bg-red-50 border-red-200 text-red-700'
                         }`}>
                         {status}
                     </div>

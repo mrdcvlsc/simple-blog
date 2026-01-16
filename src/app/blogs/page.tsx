@@ -49,7 +49,7 @@ export default function ViewBlogs() {
         const response = await supabase
             .from('blogs')
             .select("id, title, created_at")
-            .order('created_at', { ascending: true })
+            .order('created_at', { ascending: false })
             .range(to_page * of_page_size, (to_page + 1) * of_page_size - 1);
 
         if (response.error) {

@@ -1,12 +1,13 @@
 import { createSupabaseServerClient } from "@/app/_lib/_supabase_server_client";
+import Image from "next/image";
 import Link from "next/link";
 
 export default async function ReadBlog({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createSupabaseServerClient();
     const { id } = await params;
     const response = await supabase.from('blogs')
-        .select('created_at, title, body, upvotes, downvotes')
-        .eq('id', id).single();
+        .select()
+        .eq('id', parseInt(id)).single();
 
     const data = response.data;
     const error = response.error;
@@ -41,6 +42,12 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                     <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 leading-tight">
                         {data.title}
                     </h1>
+                </div>
+
+                <div className="glass-card space-y-6">
+                    <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
+                        <Image alt="blog-image" width={100} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${data.image}`}/>
+                    </div>
                 </div>
 
                 <div className="glass-card space-y-6">

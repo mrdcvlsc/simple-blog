@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           downvotes: number
           id: number
+          image: string | null
           owner_id: string
           title: string
           upvotes: number
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           downvotes?: number
           id?: number
+          image?: string | null
           owner_id?: string
           title: string
           upvotes?: number
@@ -38,11 +40,50 @@ export type Database = {
           created_at?: string
           downvotes?: number
           id?: number
+          image?: string | null
           owner_id?: string
           title?: string
           upvotes?: number
         }
         Relationships: []
+      }
+      comments: {
+        Row: {
+          blog_id: number
+          comment: string
+          created_at: string
+          email: string | null
+          id: number
+          image: string | null
+          owner_id: string | null
+        }
+        Insert: {
+          blog_id: number
+          comment: string
+          created_at?: string
+          email?: string | null
+          id?: number
+          image?: string | null
+          owner_id?: string | null
+        }
+        Update: {
+          blog_id?: number
+          comment?: string
+          created_at?: string
+          email?: string | null
+          id?: number
+          image?: string | null
+          owner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_blog_id_fkey"
+            columns: ["blog_id"]
+            isOneToOne: false
+            referencedRelation: "blogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
