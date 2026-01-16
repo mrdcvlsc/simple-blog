@@ -4,7 +4,10 @@ import Link from "next/link";
 
 export default async function ReadBlog({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createSupabaseServerClient();
+    const authUserID = (await supabase.auth.getUser()).data.user?.id;
+
     const { id } = await params;
+
     const response = await supabase.from('blogs')
         .select()
         .eq('id', parseInt(id)).single();
@@ -70,12 +73,15 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <Link href={`/blog/update/${id}`} className="glass-button-secondary flex-1 text-center">
-                        Edit Blog
-                    </Link>
-                    <Link href={`/blog/delete/${id}`} className="glass-button-secondary flex-1 text-center bg-red-50 text-red-600 hover:bg-red-100">
-                        Delete Blog
-                    </Link>
+                    {authUserID == data.owner_id ? <>
+                        <Link href={`/blog/update/${id}`} className="glass-button-secondary flex-1 text-center">
+                            Edit Blog
+                        </Link>
+
+                        <Link href={`/blog/delete/${id}`} className="glass-button-secondary flex-1 text-center bg-red-50 text-red-600 hover:bg-red-100">
+                            Delete Blog
+                        </Link></> : null}
+
                     <Link href="/blogs" className="glass-button-primary flex-1 text-center">
                         Explore Blogs
                     </Link>
