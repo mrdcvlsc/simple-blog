@@ -154,12 +154,12 @@ export default function ViewBlogs() {
 
             <div className="flex justify-center gap-4 h-full">
                 <label>
-                    Page : <input type='string' className="glass-input w-16" defaultValue={pageInput} onChange={handlePageChange} />
+                    Page : <input type='string' className="glass-input w-16" value={pageInput} onChange={handlePageChange} />
                 </label>
                 <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageDecrement}>{'<'}</button>
                 <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageIncrement}>{'>'}</button>
                 <label> Page Size :
-                    <input type='string' className="glass-input w-16" defaultValue={pageSizeInput} onChange={handlePageSizeChange} />
+                    <input type='string' className="glass-input w-16" value={pageSizeInput} onChange={handlePageSizeChange} />
                 </label>
             </div>
         </div>
