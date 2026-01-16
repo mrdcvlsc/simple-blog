@@ -2,7 +2,7 @@
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
 import type { User } from "@supabase/supabase-js";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -23,6 +23,15 @@ export default function UserHomePage() {
 
     const [status, setStatus] = useState('');
     const [userBlogs, setUserBlogs] = useState<BlogList>([]);
+
+    const [publishedBlogs, setPublishedBlogs] = useState(0);
+
+    const [page, setPage] = useState('0');
+    const [pageSize, setPageSize] = useState('4');
+
+    const paginationInputChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [pageInput, setPageInput] = useState('0');
+    const [pageSizeInput, setPageSizeInput] = useState('4');
 
     useEffect(() => {
         // async function authenticateUser() {
@@ -61,34 +70,82 @@ export default function UserHomePage() {
             return;
         }
 
-        async function loadBlogs() {
+        async function countUserBlogs() {
             if (!authUser) {
-                setStatus(
-                    "there was a problem in the app, we detected that a user is logged" +
-                    "-in but the user data is not preset, please clear the browser" +
-                    "history, cache and cookies of this website and login again with" +
-                    "your account to possibly fix the issue."
-                );
+                setPublishedBlogs(0);
                 return;
             }
 
-            const response = await supabase
+            const { count, error: err_count } = await supabase
                 .from('blogs')
-                .select("id, title, created_at")
+                .select("owner_id", { count: 'exact', head: true })
                 .eq('owner_id', authUser.id);
 
-            if (response.error) {
-                setStatus(`we're unable to load the user blog post, ${response.error.message}`);
-                return;
+            if (err_count) {
+                setStatus('unable to get the total blogs published by the user');
             }
 
-            console.log('blogs:');
-            console.log(response.data);
-            setUserBlogs(response.data);
-        };
+            if (count) {
+                console.log('got count =', count);
+                setPublishedBlogs(count);
+            } else {
+                console.log('count is null for some reason');
+            }
+        }
 
-        loadBlogs();
+        countUserBlogs();
+        loadBlogs(page, pageSize);
+
+        return () => {
+            if (paginationInputChangeTimerRef.current) {
+                clearTimeout(paginationInputChangeTimerRef.current);
+            }
+        };
     }, []);
+
+
+    const loadBlogs = async function (toPage: string, ofPageSize: string) {
+        if (!authUser) {
+            setStatus(
+                "there was a problem in the app, we detected that a user is logged" +
+                "-in but the user data is not preset, please clear the browser" +
+                "history, cache and cookies of this website and login again with" +
+                "your account to possibly fix the issue."
+            );
+            return;
+        }
+
+        console.log(`load blog : page = ${toPage}, page size = ${ofPageSize}`);
+
+        const to_page = parseInt(toPage);
+        const of_page_size = parseInt(ofPageSize);
+
+        if (to_page < 0) {
+            setStatus('invalid page number');
+            return;
+        }
+
+        if (of_page_size < 1 || of_page_size > 30 || isNaN(of_page_size)) {
+            setStatus('invalid page size');
+            return;
+        }
+
+        const response = await supabase
+            .from('blogs')
+            .select("id, title, created_at")
+            .range(to_page * of_page_size, (to_page + 1) * of_page_size - 1)
+            .eq('owner_id', authUser.id);
+
+        if (response.error) {
+            setStatus(`we're unable to load the user blog post, ${response.error.message}`);
+            return;
+        }
+
+        console.log('blogs:');
+        console.log(response.data);
+        setUserBlogs(response.data);
+        setStatus('');
+    };
 
     const handleLogout = async function logoutUser() {
         let { error } = await supabase.auth.signOut();
@@ -100,6 +157,49 @@ export default function UserHomePage() {
 
         dispatch(logOut());
         router.push('/');
+    }
+
+    const handlePageChange = async function (e: React.ChangeEvent<HTMLInputElement>) {
+        setPageInput(e.target.value);
+
+        if (paginationInputChangeTimerRef.current) {
+            clearTimeout(paginationInputChangeTimerRef.current);
+        }
+
+        paginationInputChangeTimerRef.current = setTimeout(async () => {
+            await loadBlogs(e.target.value, pageSize);
+            setPage(e.target.value);
+            setPageInput(e.target.value);
+        }, 1000);
+    }
+
+    const handlePageSizeChange = async function (e: React.ChangeEvent<HTMLInputElement>) {
+        setPageSizeInput(e.target.value);
+
+        if (paginationInputChangeTimerRef.current) {
+            clearTimeout(paginationInputChangeTimerRef.current);
+        }
+
+        paginationInputChangeTimerRef.current = setTimeout(async () => {
+            await loadBlogs('0', e.target.value);
+            setPage('0');
+            setPageInput('0');
+            setPageSize(e.target.value);
+            setPageSizeInput(e.target.value);
+        }, 1000);
+
+    }
+
+    const handlePageIncrement = async function () {
+        await loadBlogs(`${parseInt(page) + 1}`, pageSize);
+        setPage(`${parseInt(page) + 1}`);
+        setPageInput(`${parseInt(page) + 1}`);
+    }
+
+    const handlePageDecrement = async function () {
+        await loadBlogs(`${parseInt(page) - 1}`, pageSize);
+        setPage(`${parseInt(page) - 1}`);
+        setPageInput(`${parseInt(page) - 1}`);
     }
 
     return (
@@ -136,66 +236,67 @@ export default function UserHomePage() {
             <div className="space-y-6">
                 <div>
                     <h2 className="text-3xl font-bold text-gray-800 mb-2">Your Blogs</h2>
-                    <p className="text-gray-600">{userBlogs.length} {userBlogs.length === 1 ? 'blog' : 'blogs'} published</p>
+                    <p className="text-gray-600">{publishedBlogs} {publishedBlogs === 1 ? 'blog' : 'blogs'} published</p>
                 </div>
 
-                {userBlogs.length === 0 ? (
-                    <div className="glass-card text-center py-12">
-                        <h3 className="text-2xl font-semibold text-gray-800 mb-2">No Blogs Yet</h3>
-                        <p className="text-gray-600 mb-6">You haven't published any blogs yet. Start writing and sharing your thoughts!</p>
-                        <Link href={'/blog/create'} className="glass-button-primary inline-flex">
-                            Write Your First Blog
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {userBlogs.map((blog, idx) => {
-                            const date = new Date(blog.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {userBlogs.map((blog, idx) => {
+                        const date = new Date(blog.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
 
-                            return (
-                                <div key={idx} className="glass-card group space-y-4">
-                                    <div className="flex items-start justify-between">
-                                        <div></div>
-                                        <div className="flex gap-2">
-                                            <Link
-                                                href={`/blog/update/${blog.id}`}
-                                                className="p-2 rounded-lg hover:bg-sky-50 transition-colors text-gray-600 hover:text-sky-600"
-                                                title="Edit"
-                                            >
-                                                edit
-                                            </Link>
-                                            <Link
-                                                href={`/blog/delete/${blog.id}`}
-                                                className="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-600 hover:text-red-600"
-                                                title="Delete"
-                                            >
-                                                delete
-                                            </Link>
-                                        </div>
-                                    </div>
-                                    <Link href={`/blog/read/${blog.id}`} className="block group">
-                                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2">
-                                            {blog.title}
-                                        </h3>
-                                    </Link>
-                                    <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                                        <span className="text-sm text-gray-500">{date}</span>
+                        return (
+                            <div key={idx} className="glass-card group space-y-4">
+                                <div className="flex items-start justify-between">
+                                    <div></div>
+                                    <div className="flex gap-2">
                                         <Link
-                                            href={`/blog/read/${blog.id}`}
-                                            className="text-sky-500 group-hover:translate-x-1 transition-transform"
+                                            href={`/blog/update/${blog.id}`}
+                                            className="p-2 rounded-lg hover:bg-sky-50 transition-colors text-gray-600 hover:text-sky-600"
+                                            title="Edit"
                                         >
-                                            →
+                                            edit
+                                        </Link>
+                                        <Link
+                                            href={`/blog/delete/${blog.id}`}
+                                            className="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-600 hover:text-red-600"
+                                            title="Delete"
+                                        >
+                                            delete
                                         </Link>
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
-                )}
+                                <Link href={`/blog/read/${blog.id}`} className="block group">
+                                    <h3 className="text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2">
+                                        {blog.title}
+                                    </h3>
+                                </Link>
+                                <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                                    <span className="text-sm text-gray-500">{date}</span>
+                                    <Link
+                                        href={`/blog/read/${blog.id}`}
+                                        className="text-sky-500 group-hover:translate-x-1 transition-transform"
+                                    >
+                                        →
+                                    </Link>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="flex justify-center gap-4 h-full">
+                    <label>
+                        Page : <input type='string' className="glass-input w-16" value={pageInput} onChange={handlePageChange} />
+                    </label>
+                    <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageDecrement}>{'<'}</button>
+                    <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageIncrement}>{'>'}</button>
+                    <label> Page Size :
+                        <input type='string' className="glass-input w-16" value={pageSizeInput} onChange={handlePageSizeChange} />
+                    </label>
+                </div>
             </div>
         </div>
     )
