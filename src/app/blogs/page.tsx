@@ -1,7 +1,7 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 import type { BlogList } from '@/app/_lib/mytypes';
@@ -15,8 +15,18 @@ export default function ViewBlogs() {
     const [page, setPage] = useState('0');
     const [pageSize, setPageSize] = useState('4');
 
+    const paginationInputChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [pageInput, setPageInput] = useState('0');
+    const [pageSizeInput, setPageSizeInput] = useState('4');
+
     useEffect(() => {
         loadBlogs(page, pageSize);
+
+        return () => {
+            if (paginationInputChangeTimerRef.current) {
+                clearTimeout(paginationInputChangeTimerRef.current);
+            }
+        };
     }, []);
 
 
@@ -51,24 +61,46 @@ export default function ViewBlogs() {
     };
 
     const handlePageChange = async function (e: React.ChangeEvent<HTMLInputElement>) {
-        await loadBlogs(e.target.value, pageSize);
-        setPage(e.target.value);
+        setPageInput(e.target.value);
+
+        if (paginationInputChangeTimerRef.current) {
+            clearTimeout(paginationInputChangeTimerRef.current);
+        }
+
+        paginationInputChangeTimerRef.current = setTimeout(async () => {
+            await loadBlogs(e.target.value, pageSize);
+            setPage(e.target.value);
+            setPageInput(e.target.value);
+        }, 1000);
     }
 
     const handlePageSizeChange = async function (e: React.ChangeEvent<HTMLInputElement>) {
-        await loadBlogs('0', e.target.value);
-        setPage('0');
-        setPageSize(e.target.value);
+        setPageSizeInput(e.target.value);
+
+        if (paginationInputChangeTimerRef.current) {
+            clearTimeout(paginationInputChangeTimerRef.current);
+        }
+
+        paginationInputChangeTimerRef.current = setTimeout(async () => {
+            await loadBlogs('0', e.target.value);
+            setPage('0');
+            setPageInput('0');
+            setPageSize(e.target.value);
+            setPageSizeInput(e.target.value);
+        }, 1000);
+
     }
 
     const handlePageIncrement = async function () {
         await loadBlogs(`${parseInt(page) + 1}`, pageSize);
         setPage(`${parseInt(page) + 1}`);
+        setPageInput(`${parseInt(page) + 1}`);
     }
 
     const handlePageDecrement = async function () {
         await loadBlogs(`${parseInt(page) - 1}`, pageSize);
         setPage(`${parseInt(page) - 1}`);
+        setPageInput(`${parseInt(page) - 1}`);
     }
 
     return (
@@ -121,12 +153,12 @@ export default function ViewBlogs() {
 
             <div className="flex justify-center gap-4 h-full">
                 <label>
-                    Page : <input type='string' className="glass-input w-16" defaultValue={page} onChange={handlePageChange} />
+                    Page : <input type='string' className="glass-input w-16" defaultValue={pageInput} onChange={handlePageChange} />
                 </label>
                 <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageDecrement}>{'<'}</button>
                 <button className="glass-button-secondary cursor-pointer hover:scale-105 font-extrabold" onClick={handlePageIncrement}>{'>'}</button>
                 <label> Page Size :
-                    <input type='string' className="glass-input w-16" defaultValue={pageSize} onChange={handlePageSizeChange} />
+                    <input type='string' className="glass-input w-16" defaultValue={pageSizeInput} onChange={handlePageSizeChange} />
                 </label>
             </div>
         </div>
