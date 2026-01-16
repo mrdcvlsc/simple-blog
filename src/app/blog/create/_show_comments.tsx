@@ -37,6 +37,7 @@ export default function ShowComments({ id }: { id: string }) {
                 :
                 <button onClick={handleViewComments} className="glass-button-secondary hover:scale-105 hover:border-amber-200 cursor-pointer w-full">Load/Refresh Comments</button>
             }
+            {status && <div className="glass-card border-red-500 text-red-500">{status}</div>}
             <div className="flex flex-col gap-2">
                 {comments.map((comment, idx) => {
                     const date = new Date(comment.created_at).toLocaleDateString('en-US', {

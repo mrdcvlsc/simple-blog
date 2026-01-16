@@ -67,6 +67,7 @@ export default function AddComment({ id }: { id: string }) {
         <div>
             <div className="glass-card flex flex-col gap-3">
                 <h6>Add a comment</h6>
+                {status && <div className="border-red-500 text-red-500">{status}</div>}
                 <input className="glass-input border-blue-300" type="text" value={comment} onChange={(e) => setComment(e.target.value)} />
 
                 <div className="w-full">
