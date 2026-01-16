@@ -107,14 +107,12 @@ export default function CreateBlog() {
                     <label className="block text-lg font-semibold text-gray-800 mb-2">Upload Image</label>
                     {selectedImage && (
                         <div>
-                            {/* Display the selected image */}
                             <img
                                 alt="not found"
                                 width={"250px"}
                                 src={URL.createObjectURL(selectedImage)}
                             />
                             <br /> <br />
-                            {/* Button to remove the selected image */}
                             <button onClick={() => {
                                 if (fileInputRef.current) {
                                     fileInputRef.current.value = '';

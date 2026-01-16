@@ -44,11 +44,12 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                     </h1>
                 </div>
 
-                <div className="glass-card space-y-6">
-                    <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
-                        <Image alt="blog-image" width={100} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${data.image}`}/>
-                    </div>
-                </div>
+                {data.image ?
+                    <div className="glass-card space-y-6">
+                        <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
+                            <Image alt="blog-image" width={100} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${data.image}`} />
+                        </div>
+                    </div> : null}
 
                 <div className="glass-card space-y-6">
                     <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">

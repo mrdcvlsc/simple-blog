@@ -13,6 +13,7 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
     const authUser = useAppSelector((state) => state.authReducer.value.user);
 
     const [title, setTitle] = useState('');
+    const [image, setImage] = useState<string | null>('');
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
     const [ownerID, setOwnerID] = useState('');
@@ -42,6 +43,8 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
             const data = response.data;
             const error = response.error;
 
+            console.log('blog to delete data =', data);
+
             if (error) {
                 setStatus("Opps! we didn't find that blog, it might have been deleted or is not existing yet");
                 return;
@@ -49,6 +52,7 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
 
             if (data) {
                 setTitle(data?.title);
+                setImage(data?.image ? data.image : null);
                 setBody(data?.body);
                 setOwnerID(data?.owner_id);
             } else {
@@ -70,6 +74,20 @@ export default function DeleteBlog({ params }: { params: Promise<{ id: string }>
         if (error) {
             setStatus(error.message);
             return;
+        }
+
+        console.log('blog to delete data image selected =', image);
+
+        if (image) {
+            const { data: img_data, error: error_delete_image } = await supabase
+                .storage
+                .from('uploaded_images')
+                .remove([image]);
+
+            if (error_delete_image) {
+                setStatus(`blog deleted, but its associated image was not: ${error_delete_image.message}`);
+                return;
+            }
         }
 
         router.push('/user/home');

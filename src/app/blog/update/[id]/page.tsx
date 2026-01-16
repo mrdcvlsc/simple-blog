@@ -1,10 +1,11 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/app/_lib/_supabase_browser_client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useAppSelector } from '@/redux/store';
+import Image from 'next/image';
 
 export default function UpdateBlog({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -13,9 +14,13 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
     const authUser = useAppSelector((state) => state.authReducer.value.user);
 
     const [title, setTitle] = useState('');
+    const [image, setImage] = useState<string | null>(null);
     const [body, setBody] = useState('');
     const [status, setStatus] = useState('');
     const [ownerID, setOwnerID] = useState('');
+
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         if (!isAuth) {
@@ -36,7 +41,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             }
 
             const response = await supabase.from('blogs')
-                .select('id, owner_id, created_at, title, body, upvotes, downvotes')
+                .select()
                 .eq('id', parseInt(id)).single();
 
             const data = response.data;
@@ -49,6 +54,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
 
             if (data) {
                 setTitle(data?.title);
+                setImage(data?.image);
                 setBody(data?.body);
                 setOwnerID(data?.owner_id);
             } else {
@@ -67,14 +73,47 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             return;
         }
 
+
+        if (selectedImage) {
+            const { data, error } = await supabase
+                .storage
+                .from('uploaded_images')
+                .upload(`private/${selectedImage.name}`, selectedImage, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            console.log('    data.path :', data?.path);
+            console.log('data.id :', data?.id);
+            console.log('data.fullPath :', data?.fullPath);
+
+            if (error) {
+                console.log('error uploading image :', error.message);
+                setStatus(error.message);
+            }
+        }
+
         const { error } = await supabase.from('blogs').update({
             title: title,
             body: body,
+            image: selectedImage ? `private/${selectedImage.name}` : null,
         }).eq('id', parseInt((await params).id)).select();
 
         if (error) {
             setStatus(error.message);
             return;
+        }
+
+        if (image) {
+            const { data: img_data, error: error_delete_image } = await supabase
+                .storage
+                .from('uploaded_images')
+                .remove([image]);
+
+            if (error_delete_image) {
+                setStatus(`blog deleted, but its associated image was not: ${error_delete_image.message}`);
+                return;
+            }
         }
 
         router.push(`/blog/read/${parseInt((await params).id)}`);
@@ -100,6 +139,46 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
                         className='glass-input text-lg'
                         required
                     />
+                </div>
+
+                {image ? <div>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Old Image</label>
+                    <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
+                        <Image alt="blog-image" width={100} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${image}`} />
+                    </div>
+                </div> : null}
+
+                <div>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Upload New Image</label>
+                    {selectedImage && (
+                        <div>
+                            <img
+                                alt="not found"
+                                width={"250px"}
+                                src={URL.createObjectURL(selectedImage)}
+                            />
+                            <br /> <br />
+                            <button onClick={() => {
+                                if (fileInputRef.current) {
+                                    fileInputRef.current.value = '';
+                                }
+                                setSelectedImage(null)
+                            }}>Remove</button>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        name="myImage"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={(event) => {
+                            if (event.target.files) {
+                                console.log(event.target.files[0]);
+                                setSelectedImage(event.target.files[0]);
+                            }
+                        }}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Upload beautiful image</p>
                 </div>
 
                 <div>
