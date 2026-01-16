@@ -1,6 +1,9 @@
 import { createSupabaseServerClient } from "@/app/_lib/_supabase_server_client";
+
 import Image from "next/image";
 import Link from "next/link";
+import AddComment from "../../create/_add_comments";
+import ShowComments from "../../create/_show_comments";
 
 export default async function ReadBlog({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createSupabaseServerClient();
@@ -86,6 +89,9 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                         Explore Blogs
                     </Link>
                 </div>
+
+                <ShowComments id={id} />
+                <AddComment id={id} />
             </div>
         )
     } else {
