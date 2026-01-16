@@ -140,11 +140,9 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
                     />
                 </div>
 
-                {image ? <div>
-                    <label className="block text-lg font-semibold text-gray-800 mb-2">Old Image</label>
-                    <div className="prose prose-sm sm:prose max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed text-base sm:text-lg">
-                        <Image alt="blog-image" width={100} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${image}`} />
-                    </div>
+                <label className="block text-lg font-semibold text-gray-800 mb-2">Old Image</label>
+                {image ? <div className="flex justify-center align-middle">
+                    <Image alt="blog-image" width={300} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${image}`} />
                 </div> : null}
 
                 <div className='flex flex-col gap-2'>

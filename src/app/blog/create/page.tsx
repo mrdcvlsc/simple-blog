@@ -110,7 +110,7 @@ export default function CreateBlog() {
                         <div className='flex flex-col justify-center items-center gap-2'>
                             <img
                                 alt="not found"
-                                width={"250px"}
+                                width={"300px"}
                                 src={URL.createObjectURL(selectedImage)}
                             />
                             <button className='glass-button-primary cursor-pointer' onClick={() => {
