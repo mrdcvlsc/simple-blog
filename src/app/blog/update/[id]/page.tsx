@@ -73,12 +73,11 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
             return;
         }
 
-
         if (selectedImage) {
             const { data, error } = await supabase
                 .storage
                 .from('uploaded_images')
-                .upload(`private/${selectedImage.name}`, selectedImage, {
+                .upload(`${authUser.id}/${selectedImage.name}`, selectedImage, {
                     cacheControl: '3600',
                     upsert: false
                 });
@@ -96,7 +95,7 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
         const { error } = await supabase.from('blogs').update({
             title: title,
             body: body,
-            image: selectedImage ? `private/${selectedImage.name}` : null,
+            image: selectedImage ? `${authUser.id}/${selectedImage.name}` : null,
         }).eq('id', parseInt((await params).id)).select();
 
         if (error) {
@@ -148,25 +147,27 @@ export default function UpdateBlog({ params }: { params: Promise<{ id: string }>
                     </div>
                 </div> : null}
 
-                <div>
-                    <label className="block text-lg font-semibold text-gray-800 mb-2">Upload New Image</label>
+                <div className='flex flex-col gap-2'>
+                    <label className="block text-lg font-semibold text-gray-800 mb-2">Upload Image</label>
                     {selectedImage && (
-                        <div>
+                        <div className='flex flex-col justify-center items-center gap-2'>
                             <img
                                 alt="not found"
                                 width={"250px"}
                                 src={URL.createObjectURL(selectedImage)}
                             />
-                            <br /> <br />
-                            <button onClick={() => {
+                            <button className='glass-button-primary cursor-pointer' onClick={() => {
                                 if (fileInputRef.current) {
                                     fileInputRef.current.value = '';
                                 }
                                 setSelectedImage(null)
-                            }}>Remove</button>
+                            }}>Remove Image</button>
                         </div>
                     )}
+
                     <input
+                        hidden={selectedImage ? true : false}
+                        className='glass-button-primary cursor-pointer w-full'
                         type="file"
                         name="myImage"
                         accept="image/*"
