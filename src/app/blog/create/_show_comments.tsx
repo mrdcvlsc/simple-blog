@@ -47,7 +47,7 @@ export default function ShowComments({ id }: { id: string }) {
                     });
 
                     return (
-                        <div className="glass-card flex flex-col gap-2" key={idx}>
+                        <div className="glass-card flex flex-col gap-2" key={comment.id}>
                             <div className="border-b-blue-800"><p className="font-bold">{comment.email}</p></div>
                             <p className="font-light">{comment.comment}</p>
                             {comment.image ? <div className="space-y-6 flex justify-center align-middle h-3/4">

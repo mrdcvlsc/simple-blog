@@ -134,7 +134,7 @@ export default function ViewBlogs() {
 
                     return (
                         <Link
-                            key={idx}
+                            key={blog.id}
                             href={`/blog/read/${blog.id}`}
                             className="glass-card group cursor-pointer h-full"
                         >

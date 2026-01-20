@@ -5,7 +5,7 @@ type InitialState = {
   value: AuthState;
 }
 
-type AuthState = {
+export type AuthState = {
   user: User | null;
   isAuth: boolean;
 }

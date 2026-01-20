@@ -21,6 +21,8 @@ export default function UserHomePage() {
     const authUser = useAppSelector((state) => state.authReducer.value.user);
     const dispatch = useDispatch<AppDispatch>();
 
+    const [mounted, setMounted] = useState(false);
+
     const [status, setStatus] = useState('');
     const [userBlogs, setUserBlogs] = useState<BlogList>([]);
 
@@ -34,6 +36,7 @@ export default function UserHomePage() {
     const [pageSizeInput, setPageSizeInput] = useState('4');
 
     useEffect(() => {
+        setMounted(true);
         // async function authenticateUser() {
         //     const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -208,16 +211,18 @@ export default function UserHomePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-2">
                     <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-linear-to-r from-sky-600 to-cyan-600 bg-clip-text">
-                        Welcome, {authUser?.email?.split('@')[0] || 'Writer'}
+                        Welcome, {mounted && authUser ? authUser.email?.split('@')[0] : 'Writer'}
                     </h1>
-                    <p className="text-gray-600">{authUser?.email}</p>
+                    <p className="text-gray-600">{mounted && authUser ? authUser.email : ''}</p>
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="glass-button-secondary text-base whitespace-nowrap"
-                >
-                    Logout
-                </button>
+                {mounted && isAuth ? (
+                    <button
+                        onClick={handleLogout}
+                        className="glass-button-secondary text-base whitespace-nowrap"
+                    >
+                        Logout
+                    </button>
+                ) : null}
             </div>
 
             {status && (
@@ -249,7 +254,7 @@ export default function UserHomePage() {
                         });
 
                         return (
-                            <div key={idx} className="glass-card group space-y-4">
+                            <div key={blog.id} className="glass-card group space-y-4">
                                 <div className="flex items-start justify-between">
                                     <div></div>
                                     <div className="flex gap-2">
