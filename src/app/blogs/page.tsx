@@ -48,7 +48,7 @@ export default function ViewBlogs() {
 
         const response = await supabase
             .from('blogs')
-            .select("id, title, created_at")
+            .select("id, title, created_at, owner_email")
             .order('created_at', { ascending: false })
             .range(to_page * of_page_size, (to_page + 1) * of_page_size - 1);
 
@@ -138,11 +138,15 @@ export default function ViewBlogs() {
                             href={`/blog/read/${blog.id}`}
                             className="glass-card group cursor-pointer h-full"
                         >
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2">
-                                    {blog.title}
-                                </h3>
+                            <div className="space-y-0.5 flex flex-col justify-between h-full">
+                                <div className=' h-full flex flex-col justify-between'>
+                                    <h5 className=" text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2 mb-3">
+                                        {blog.title}
+                                    </h5>
+                                    <p className=''>{blog?.owner_email ? blog.owner_email : null}</p>
+                                </div>
                                 <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                                    {/* <div className="flex items-center justify-between pt-4 border-t border-b-black"> */}
                                     <span className="text-sm text-gray-500">{date}</span>
                                     <span className="text-sky-500 group-hover:translate-x-1 transition-transform">→</span>
                                 </div>
