@@ -105,12 +105,18 @@ export default function ShowComments({ id }: { id: string }) {
                     const date = new Date(comment.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
-                        day: 'numeric'
+                        day: 'numeric',
+                        hour: "numeric",
+                        minute: "numeric",
+                        hour12: true,
                     });
 
                     return (
                         <div className="glass-card flex flex-col gap-2" key={comment.id}>
-                            <div className="border-b-blue-800"><p className="font-bold">{comment.email}</p></div>
+                            <div className="border-b-blue-800 flex align-middle justify-between"> 
+                                <p className="font-bold">{comment.email}</p>
+                                <p className="text-sm">{date}</p>
+                            </div>
                             <p className="font-light">{comment.comment}</p>
                             {comment.image ? <div className="space-y-6 flex justify-center align-middle h-3/4">
                                 <Image alt="blog-image" width={300} height={100} src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploaded_images/${comment.image}`} />

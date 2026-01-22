@@ -37,6 +37,9 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
             year: "numeric",
             month: "long",
             day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
         });
 
         return (
