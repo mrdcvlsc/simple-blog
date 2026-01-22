@@ -91,7 +91,7 @@ export default async function ReadBlog({ params }: { params: Promise<{ id: strin
                 </div>
 
                 <ShowComments id={id} />
-                <AddComment id={id} />
+                {/* <AddComment id={id} /> */}
             </div>
         )
     } else {
