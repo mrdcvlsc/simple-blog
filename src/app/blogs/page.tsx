@@ -129,7 +129,10 @@ export default function ViewBlogs() {
                     const date = new Date(blog.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
-                        day: 'numeric'
+                        day: 'numeric',
+                        hour: "numeric",
+                        minute: "numeric",
+                        hour12: true,
                     });
 
                     return (

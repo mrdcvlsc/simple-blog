@@ -250,13 +250,15 @@ export default function UserHomePage() {
                         const date = new Date(blog.created_at).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
-                            day: 'numeric'
+                            day: 'numeric',
+                            hour: "numeric",
+                            minute: "numeric",
+                            hour12: true,
                         });
 
                         return (
-                            <div key={blog.id} className="glass-card group space-y-4">
-                                <div className="flex items-start justify-between">
-                                    <div></div>
+                            <div key={blog.id} className="glass-card group space-y-2">
+                                <div className=" flex justify-end">
                                     <div className="flex gap-2">
                                         <Link
                                             href={`/blog/update/${blog.id}`}
@@ -274,19 +276,23 @@ export default function UserHomePage() {
                                         </Link>
                                     </div>
                                 </div>
-                                <Link href={`/blog/read/${blog.id}`} className="block group">
-                                    <h3 className="text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2">
-                                        {blog.title}
-                                    </h3>
-                                </Link>
-                                <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                                    <span className="text-sm text-gray-500">{date}</span>
-                                    <Link
-                                        href={`/blog/read/${blog.id}`}
-                                        className="text-sky-500 group-hover:translate-x-1 transition-transform"
-                                    >
-                                        →
-                                    </Link>
+                                <div className="h-2/3 flex flex-col justify-between">
+                                    <div>
+                                        <Link href={`/blog/read/${blog.id}`} className="block group">
+                                            <h3 className="text-xl font-bold text-gray-800 group-hover:text-sky-600 transition-colors line-clamp-2">
+                                                {blog.title}
+                                            </h3>
+                                        </Link>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                                        <span className="text-sm text-gray-500">{date}</span>
+                                        <Link
+                                            href={`/blog/read/${blog.id}`}
+                                            className="text-sky-500 group-hover:translate-x-1 transition-transform"
+                                        >
+                                            →
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         );
