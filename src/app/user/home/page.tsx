@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 
 import type { AppDispatch } from '@/redux/store';
 
-import type { BlogList } from '@/app/_lib/mytypes';
+import type { BlogListWithoutOwnerEmail } from '@/app/_lib/mytypes';
 import { logOut } from '@/redux/authslice';
 
 export default function UserHomePage() {
@@ -24,7 +24,7 @@ export default function UserHomePage() {
     const [mounted, setMounted] = useState(false);
 
     const [status, setStatus] = useState('');
-    const [userBlogs, setUserBlogs] = useState<BlogList>([]);
+    const [userBlogs, setUserBlogs] = useState<BlogListWithoutOwnerEmail>([]);
 
     const [publishedBlogs, setPublishedBlogs] = useState(0);
 
