@@ -21,6 +21,7 @@ export type Database = {
           downvotes: number
           id: number
           image: string | null
+          owner_email: string | null
           owner_id: string
           title: string
           upvotes: number
@@ -31,6 +32,7 @@ export type Database = {
           downvotes?: number
           id?: number
           image?: string | null
+          owner_email?: string | null
           owner_id?: string
           title: string
           upvotes?: number
@@ -41,6 +43,7 @@ export type Database = {
           downvotes?: number
           id?: number
           image?: string | null
+          owner_email?: string | null
           owner_id?: string
           title?: string
           upvotes?: number
