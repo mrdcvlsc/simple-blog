@@ -68,6 +68,7 @@ export default function CreateBlog() {
             title: title,
             body: body,
             image: selectedImage ? `${user?.id}/${selectedImage.name}` : null,
+            owner_email: user?.email ? user.email : null,
         }).select();
 
         console.log('insert data =', data);
